@@ -1,4 +1,47 @@
 (function ( $ ) {
+  $.fn.autoGrowInput = function(o) {
+    o = $.extend(o, {
+      maxWidth: 1000,
+      minWidth: 0,
+      comfortZone: 70
+    });
+
+    this.filter('input:text').each(function(){
+      var minWidth = o.minWidth || $(this).width(),
+          val = '',
+          input = $(this),
+          testSubject = $('<tester/>').css({
+            position: 'absolute',
+            top: -9999,
+            left: -9999,
+            width: 'auto',
+            fontSize: input.css('fontSize'),
+            fontFamily: input.css('fontFamily'),
+            fontWeight: input.css('fontWeight'),
+            letterSpacing: input.css('letterSpacing'),
+            whiteSpace: 'nowrap'
+          }),
+          check = function() {
+            if (val === (val = input.val())) {return;}
+            // Enter new content into testSubject
+            var escaped = val.replace(/&/g, '&amp;').replace(/\s/g,' ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            testSubject.html(escaped);
+            // Calculate new width + whether to change
+            var testerWidth = testSubject.width(),
+                newWidth = (testerWidth + o.comfortZone) >= minWidth ? testerWidth + o.comfortZone : minWidth,
+                currentWidth = input.width(),
+                isValidWidthChange = (newWidth < currentWidth && newWidth >= minWidth)
+                                     || (newWidth > minWidth && newWidth < o.maxWidth);
+            // Animate width
+            if (isValidWidthChange) {
+              input.width(newWidth);
+            }
+          };
+      $('body').append(testSubject);
+      $(this).bind('keyup keydown blur update', check);
+    });
+    return this;
+  };
   $.widget("ui.tageditor", {
     options: {
       autocomplete: null,
@@ -15,11 +58,13 @@
       var addTagInput = $('<input>', {
         value : '',
         placeholder : this.options.defaultText
-      });
+      }).autoGrowInput();
       var markup = $('<div>', {
         id : id+'_tageditor',
         class : 'tageditor'
-      }).append(tagList).append(addTagInput).insertAfter(input);
+      }).append(tagList).append(addTagInput).click(function() {
+        addTagInput.focus();
+      }).insertAfter(input);
 
       var updateInput = function() {
         var newValue = [];
@@ -50,19 +95,26 @@
         return dup;
       };
       
-      var addTag = function(value, oid) {
-        if (!checkDuplicate(value)) {
+      var addTag = function(value, oid, initializing) {
+        if (value != '' && value.match(/^[A-Za-z0-9 \-]*$/) && !checkDuplicate(value)) {
           var tag = tagPrototype.clone(true);
           tag.prepend(value);
           tag.data('tageditor', {value: value, oid: oid});
-        tagList.append(tag);
+          tagList.append(tag);
+          updateInput();
+          if (!initializing) {
+            markup.effect('highlight');
+          }
+        } else {
+          if (!initializing) {
+            markup.effect('highlight', {color: '#FFAAAA'});
+          }
         }
         addTagInput.val('');
-        updateInput();
       };
       
 
-      
+      // Last found items from autocomplete request
       var lastItems = [];
       if(this.options.autocomplete) {
         this.options.autocomplete_options.source = this.options.autocomplete;
@@ -99,7 +151,7 @@
           });
           return found;
         };
-        // Add when comma or enter is typed
+        // Add when comma, or enter is typed
         addTagInput.bind('keypress', function(event) {
           if(event.which == 44 || event.which == 13) {
             event.preventDefault();
@@ -130,9 +182,9 @@
         $.each(inputs, function() {
           var parts = this.split(':');
           if(parts.length == 1) {
-            addTag(parts[0]);
+            addTag(parts[0],null,true);
           } else if (parts.length == 2) {
-            addTag(parts[1],parts[0]);
+            addTag(parts[1],parts[0],true);
           }
         });
         updateInput();

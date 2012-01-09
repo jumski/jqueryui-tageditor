@@ -3,3 +3,10 @@ jQuery/jQuery UI Autocompleting Tag Editor
 Requires jQuery and jQuery-ui's autocomplete widget
 
 See demo for how to use.
+
+==Features
+- autocomplete
+- autocomplete_only (don't allow non-autocompleted tags)
+- duplicate detection
+- add tag on enter or comma
+- matching to autocomplete on enter

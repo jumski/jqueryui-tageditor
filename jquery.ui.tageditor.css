@@ -1,22 +1,26 @@
 .tageditor {
-  
+border: 1px solid #000;
+overflow: auto;
 }
-.tageditor .tag {
+.tageditor .tag, .tageditor input {
 display: block;
 float: left;
+border: 0;
+padding:4px 8px 4px 8px;
+margin: 4px 0 4px 4px;
+line-height: 1em;
+}
+
+.tageditor .tag {
 text-decoration: none;
 background:#cde69c;
 color:#638421;
-margin: 0 0 0 5px;
-padding:4px 8px 4px 8px;
--moz-border-radius:2px;
--webkit-border-radius:2px;
+-moz-border-radius:4px;
+-webkit-border-radius:4px;
+border-radius:4px;
 }
 
 .tageditor input {
-border: 1px solid transparent;
 outline: 0;
 background: transparent;
-margin-left: 5px;
-padding:4px;
 }
