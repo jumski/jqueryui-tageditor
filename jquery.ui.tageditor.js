@@ -45,9 +45,10 @@
   $.widget("ui.tageditor", {
     options: {
       autocomplete: null,
-      autocomplete_options: {},
-      autocomplete_only: false,
-      defaultText: 'add tags'
+      autocompleteOptions: {},
+      autocompleteOnly: false,
+      placeholder: 'add tags',
+      singleInput: false
     },
     _create: function() {
       var self = this;
@@ -57,7 +58,7 @@
       var tagList = $('<div>');
       var addTagInput = $('<input>', {
         value : '',
-        placeholder : this.options.defaultText
+        placeholder : this.options.placeholder
       }).autoGrowInput();
       var markup = $('<div>', {
         id : id+'_tageditor',
@@ -67,6 +68,13 @@
       }).insertAfter(input);
 
       var updateInput = function() {
+        if(self.options.singleInput) {
+          if(tagList.children('.tag').length >= 1) {
+            addTagInput.attr('placeholder','');
+          } else {
+            addTagInput.attr('placeholder',self.options.placeholder);
+          }
+        }
         var newValue = [];
         tagList.children('.tag').each(function() {
           var d = $(this).data('tageditor');
@@ -95,8 +103,18 @@
         return dup;
       };
       
+      var checkSingleInput = function() {
+        if(!self.options.singleInput) return true;
+        if(tagList.children('.tag').length >= 1) {
+          return false;
+        }
+        return true;
+      }
+      
       var addTag = function(value, oid, initializing) {
-        if (value != '' && value.match(/^[A-Za-z0-9 \-]*$/) && !checkDuplicate(value)) {
+        if(value) value = value.trim();
+        if(oid) oid = oid.trim();
+        if(value != '' && value.match(/^[A-Za-z0-9 \-]*$/) && !checkDuplicate(value) && checkSingleInput()) {
           var tag = tagPrototype.clone(true);
           tag.prepend(value);
           tag.data('tageditor', {value: value, oid: oid});
@@ -116,10 +134,11 @@
 
       // Last found items from autocomplete request
       var lastItems = [];
+      var autocompleteOpen = false;
       if(this.options.autocomplete) {
-        this.options.autocomplete_options.source = this.options.autocomplete;
+        this.options.autocompleteOptions.source = this.options.autocomplete;
         
-        addTagInput.autocomplete($.extend(this.options.autocomplete_options, {
+        addTagInput.autocomplete($.extend(this.options.autocompleteOptions, {
           select: function(event,ui) {
             if(ui.item.id) {
               addTag(ui.item.value, ui.item.id);
@@ -129,6 +148,12 @@
               addTag(ui.item);
             }
             return false;
+          },
+          open: function() {
+            autocompleteOpen = true;
+          },
+          close: function() {
+            autocompleteOpen = false;
           }
         }));
         // Override menu render to get objects
@@ -139,7 +164,16 @@
         };
         
       }
-      if(!this.options.autocomplete_only) {
+      if(this.options.autocompleteOnly) {
+        // Select the first autocompleted item on comma or enter
+        addTagInput.bind('keypress', function(event) {
+          if(event.which == 44 || event.which == 13) {
+            if(autocompleteOpen && lastItems.length > 0) {
+              addTag(lastItems[0].value);
+            }
+          }
+        });
+      } else {
         // Check to see if it matches an autocomplete exactly
         var lookupItems = function(i) {
           var found = null;
@@ -166,11 +200,16 @@
           }          
         });
       }
+      // Backspace deletion
       addTagInput.bind('keydown', function(event) {
         if(event.keyCode == 8 && $(this).val() == '') {
           event.preventDefault();
           tagList.children('.tag').last().remove();
           updateInput();
+          return false;
+        }
+        if(self.options.singleInput && tagList.children('.tag').length >= 1) {
+          event.preventDefault();
           return false;
         }
       });
