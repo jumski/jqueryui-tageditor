@@ -1,0 +1,22 @@
+.tageditor {
+  
+}
+.tageditor .tag {
+display: block;
+float: left;
+text-decoration: none;
+background:#cde69c;
+color:#638421;
+margin: 0 0 0 5px;
+padding:4px 8px 4px 8px;
+-moz-border-radius:2px;
+-webkit-border-radius:2px;
+}
+
+.tageditor input {
+border: 1px solid transparent;
+outline: 0;
+background: transparent;
+margin-left: 5px;
+padding:4px;
+}
