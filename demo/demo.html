@@ -8,17 +8,39 @@
   <script src="external/jquery.min.js" type="text/javascript"></script>
   <script src="external/jquery-ui.min.js" type="text/javascript"></script>
   <script src="../jquery.ui.tageditor.js" type="text/javascript"></script>
+  <style type="text/css">
+    .demo-input {
+      border: 1px solid #000;
+      margin: 10px;
+    }
+  </style>
 </head>
 <body>
-<input id="tags" value="a,b,c" />
-<input id="tags2" value="a" />
+<p>
+  Default Autocompletion
+  <div class="demo-input">
+    <input id="tags" value="a,b,c" class="demo-input" />
+  </div>
+</p>
+<p>
+  Autocompletion Only
+  <div class="demo-input">
+    <input id="tags2" value="a" />
+  </div>
+</p>
+<p>
+  Single Input Autocompletion
+  <div class="demo-input">
+    <input id="tags3" value="a" />
+  </div>
+</p>
 <script type="text/javascript">
 $(function () {
   // For testing
   var source = [ { "id": "Netta rufina", "label": "Red-crested Pochard", "value": "Red-crested Pochard" }, { "id": "Sterna sandvicensis", "label": "Sandwich Tern", "value": "Sandwich Tern" }, { "id": "Saxicola rubetra", "label": "Whinchat", "value": "Whinchat" }, { "id": "Saxicola rubicola", "label": "European Stonechat", "value": "European Stonechat" }, { "id": "Lanius senator", "label": "Woodchat Shrike", "value": "Woodchat Shrike" }, { "id": "Coccothraustes coccothraustes", "label": "Hawfinch", "value": "Hawfinch" }, { "id": "Ficedula hypoleuca", "label": "Eurasian Pied Flycatcher", "value": "Eurasian Pied Flycatcher" }, { "id": "Sitta europaea", "label": "Eurasian Nuthatch", "value": "Eurasian Nuthatch" }, { "id": "Pyrrhula pyrrhula", "label": "Eurasian Bullfinch", "value": "Eurasian Bullfinch" }, { "id": "Muscicapa striata", "label": "Spotted Flycatcher", "value": "Spotted Flycatcher" }, { "id": "Carduelis chloris", "label": "European Greenfinch", "value": "European Greenfinch" }, { "id": "Carduelis carduelis", "label": "European Goldfinch", "value": "European Goldfinch" } ];
   $("#tags").tageditor({autocomplete: source});
-  
-  $("#tags2").tageditor({autocomplete: source, singleInput: true, autocompleteOnly: true});
+  $("#tags2").tageditor({autocomplete: source, autocompleteOnly: true});
+  $("#tags3").tageditor({autocomplete: source, singleInput: true, autocompleteOnly: true});
 });
 </script>
 </body>
