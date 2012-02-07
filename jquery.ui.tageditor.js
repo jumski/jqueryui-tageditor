@@ -1,5 +1,5 @@
 (function ( $ ) {
-$.widget("ui.tageditor", {
+  $.widget("ui.tageditor", {
     options: {
       autocomplete: null,
       autocompleteOptions: {},
@@ -9,23 +9,26 @@ $.widget("ui.tageditor", {
       validHighlight: '#ffff99',
       invalidHighlight: '#FFAAAA'
     },
+    widget: this,
     _create: function() {
       var self = this;
-      var input = this.element.hide();
+      var input = this.element
       var id = input.attr('id');
 
-      var tagList = $('<div>');
+      var tagList = $('<div class="taglist">');
       var addTagInput = $('<input>', {
         value : '',
         placeholder : this.options.placeholder
       });
+      //addTagInput.css('width', input.css('width') || input.width());
+      input.hide();
       var markup = $('<div>', {
         id : id+'_tageditor',
         class : 'tageditor'
       }).append(tagList).append(addTagInput).click(function() {
         addTagInput.focus();
       }).insertAfter(input);
-
+      var originalPadding = parseInt(addTagInput.css('padding-left'));
       var updateInput = function(initializing) {
         if(self.options.singleInput) {
           if(tagList.children('.tag').length >= 1) {
@@ -44,6 +47,7 @@ $.widget("ui.tageditor", {
           }
         });
         input.val(newValue.join(','));
+        addTagInput.css('padding-left',tagList.width() + originalPadding);
         if(!initializing) {
           input.change();
         }
@@ -92,6 +96,7 @@ $.widget("ui.tageditor", {
         }
         addTagInput.val('');
       };
+      this.addTag = addTag;
       
 
       // Last found items from autocomplete request
@@ -184,7 +189,6 @@ $.widget("ui.tageditor", {
       });
       
       markup.append(addTagInput);
-      addTagInput.autoGrowInput();
       
       var initializeTags = function() {
         var inputs = input.val().split(',');
@@ -200,6 +204,9 @@ $.widget("ui.tageditor", {
       };
       initializeTags();
     },
+    addTag: function( value, oid ) {
+      this.addTag(value, oid);
+    },
     _setOption: function( key, value ) {
       options[key] = value;
       $.Widget.prototype._setOption.apply(this, arguments);
@@ -208,53 +215,4 @@ $.widget("ui.tageditor", {
       $.Widget.prototype.destroy.call(this);
     }
   });
-
-  $.fn.autoGrowInput = function(o) {
-    o = $.extend(o, {
-      maxWidth: 1000,
-      minWidth: 0,
-      comfortZone: 70
-    });
-    
-    this.filter('input:text').each(function(){
-      var val = '',
-          input = $(this),
-          testSubject = $('<tester/>').css({
-            position: 'absolute',
-            top: -9999,
-            left: -9999,
-            width: 'auto',
-            fontSize: input.css('fontSize'),
-            fontFamily: input.css('fontFamily'),
-            fontWeight: input.css('fontWeight'),
-            letterSpacing: input.css('letterSpacing'),
-            whiteSpace: 'nowrap'
-          });
-      $('body').append(testSubject);
-      var getMinWidth = function() {
-            testSubject.html(input.attr('placeholder'));
-            return Math.max(o.minWidth || 0, 
-                            input.width(),
-                            testSubject.width()+o.comfortZone);
-          },
-          minWidth = getMinWidth(),
-          check = function() {
-            val = input.val();
-            // Enter new content into testSubject
-            var escaped = val.replace(/&/g, '&amp;').replace(/\s/g,' ').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            testSubject.html(escaped);
-            // Calculate new width + whether to change
-            var testerWidth = testSubject.width(),
-                newWidth = (testerWidth + o.comfortZone) >= minWidth ? testerWidth + o.comfortZone : minWidth,
-                currentWidth = input.width(),
-                isValidWidthChange = (newWidth <= o.maxWidth);
-            if (isValidWidthChange) {
-              input.width(newWidth);
-            }
-          };
-      $(this).bind('keyup keydown blur update', check);
-      check();
-    });
-    return this;
-  };
 })( jQuery );
